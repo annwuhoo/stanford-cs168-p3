@@ -27,25 +27,28 @@ def leastSquares(X, y):
 
 def gradientDescent(X, y_noise, y_true, alpha):
     niter = 20
-    a_gd = np.zeros((d,1))
+    a = np.zeros((d,1))
+    ret_lst = []
     for i in range(niter):
-        error = sq_err(a_gd, X, y_noise)
-        gradient = np.dot(X.transpose(), error)/n
-        a_gd = a_gd - alpha*gradient
-        print("i:", i, "; total error:",total_sq_err(a_gd, X, y_true))
-    return total_sq_err(a_gd, X, y_true)
+        # 2 * xT * (aTx - y)
+        gradient = 2 * (X.T).dot( ((a.T).dot(X.T) - y_noise.T ).T)
+        a = a - alpha*gradient
+        ret_lst.append(total_sq_err(a, X, y_true))
+    return ret_lst
 
 def SGD(X, y_noise, y_true, alpha):
     niter = 1000
-    a_gd = np.zeros((d,1))
+    a = np.zeros((d,1))
+    ret_lst = []
     for i in range(niter):
         idx = np.random.randint(d, size=1) # pick a random datapoint
-        error = sq_err(a_gd[idx], X[idx], y_noise[idx])
-        #gradient = np.dot(X.transpose(), error)/n
-        a_gd[idx] = a_gd[idx] - alpha*X[idx]*error
+        # 2 * x[idx] * (a[idx]x[idx] - y[idx])
+        gradient = 2 * X[idx] * (a_sgd[idx]*X[idx] - y_noise[idx])
+        a[idx] = a[idx] - alpha*gradient
         if (i%100 == 0):
-            print("i:", i, "; total error:",total_sq_err(a_gd, X, y_true))
-    return total_sq_err(a_gd, X, y_true)
+            print("i:", i, "; total error:",total_sq_err(a, X, y_true))
+        ret_lst.append(total_sq_err(a, X, y_true))
+    return ret_lst
 
 def main():
     # Generate data (given)
@@ -62,16 +65,21 @@ def main():
 
     # --- Part b
     niter = 20
-    #err_gd_1 = gradientDescent(X, y_noise, y_true, 0.00005)
-    err_gd_2 = gradientDescent(X, y_noise, y_true, 0.0005)
-    #err_gd_3 = gradientDescent(X, y_noise, y_true, 0.0007)
-
-    #print("1:", err_gd_1)
-    print("2:", err_gd_2)
-    #print("3:", err_gd_3)
-
-    #plt.bar([1,2,3], [err_gd_00005,err_gd_0005,err_gd_0007])
-    #plt.show()
+    gd1 = gradientDescent(X, y_noise, y_true, 0.00005)
+    gd2 = gradientDescent(X, y_noise, y_true, 0.0005)
+    gd3 = gradientDescent(X, y_noise, y_true, 0.0007)
+    print("1:", gd1)
+    print("2:", gd2)
+    print("3:", gd3)
+    t = np.arange(0, 20, 1)
+    plt.semilogy(t, gd1, 'r--', label="alpha=0.00005")
+    plt.semilogy(t, gd2, 'bs', label="alpha=0.0005")
+    plt.semilogy(t, gd3, 'g^', label="alpha=0.0007")
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=3, mode="expand", borderaxespad=0.)
+    #plt.title("Gradient Descent")
+    plt.xlabel("Iterations")
+    plt.ylabel("Convergence")
+    plt.show()
 
     # --- Part c
 
